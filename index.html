@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seller Intelligence Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EBEEF4;
+  --surface: #FFFFFF;
+  --surface-2: #F4F6FB;
+  --ink: #151A23;
+  --ink-soft: #39424F;
+  --muted: #69737F;
+  --faint: #97A0AC;
+  --line: #E3E8F0;
+  --line-strong: #CCD4E0;
+  --accent: #4338CA;
+  --accent-soft: #ECEDFE;
+  --accent-ink: #2D2891;
+  --good: #1B8A4E;
+  --good-bg: #E6F5ED;
+  --warn: #A86808;
+  --warn-bg: #FFF4DD;
+  --shadow: 0 1px 3px rgba(20,26,34,.08), 0 8px 24px rgba(20,26,34,.10);
+  --shadow-sm: 0 1px 2px rgba(20,26,34,.05);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 20px;
+  height: 52px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+.brand-icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, #4338CA, #7C3AED);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-icon svg { width: 16px; height: 16px; }
+.brand-name {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.brand-sub {
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+/* ── Nav tabs ── */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  height: 52px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color .12s, border-color .12s;
+  flex-shrink: 0;
+}
+.nav-tab:hover { color: var(--ink); }
+.nav-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.nav-tab .tab-icon { font-size: 15px; }
+.nav-tab .tab-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--faint);
+  border: 1px solid var(--line);
+  letter-spacing: .02em;
+}
+.nav-tab.active .tab-badge {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.nav-tab.placeholder { opacity: .6; }
+
+/* ── Global upload strip ── */
+.upload-strip {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+.upload-strip-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  flex-wrap: wrap;
+}
+.strip-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.strip-files {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filedrop {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  padding: 5px 11px;
+  cursor: pointer;
+  background: var(--surface-2);
+  transition: border-color .12s, background .12s;
+  user-select: none;
+}
+.filedrop:hover { border-color: var(--accent); background: var(--accent-soft); }
+.filedrop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.filedrop .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  flex-shrink: 0;
+  transition: background .12s;
+}
+.filedrop.ok { border-style: solid; border-color: #BDE5CD; background: var(--good-bg); }
+.filedrop.ok .dot { background: var(--good); }
+.filedrop .fd-lbl { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.filedrop .fd-sub { font-size: 10.5px; color: var(--faint); }
+
+.strip-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+}
+.pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--faint);
+  letter-spacing: .02em;
+}
+.pill.ready {
+  background: var(--good-bg);
+  color: var(--good);
+  border-color: #BDE5CD;
+}
+.privacy-note-strip {
+  font-size: 11px;
+  color: var(--faint);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Iframe container ── */
+.frames {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.frame-wrap {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.frame-wrap.active { display: flex; flex-direction: column; }
+.frame-wrap iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── Placeholder pages ── */
+.placeholder-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+.ph-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 48px 52px;
+  max-width: 440px;
+  text-align: center;
+}
+.ph-icon {
+  width: 60px; height: 60px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 28px;
+}
+.ph-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 10px;
+  letter-spacing: -.01em;
+}
+.ph-sub {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.ph-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px solid #F2DCA6;
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--ink);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 9999;
+  transition: transform .22s;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ── -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="8" cy="8" r="6"/>
+          <path d="M8 5v3l2 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Seller Intelligence Hub</div>
+        <div class="brand-sub">All tools · one place</div>
+      </div>
+    </div>
+
+    <nav class="nav" role="tablist">
+      <button class="nav-tab active" data-tab="manifest" role="tab">
+        <span class="tab-icon">📦</span> Manifest Watch
+        <span class="tab-badge">Daily</span>
+      </button>
+      <button class="nav-tab" data-tab="vas-revenue" role="tab">
+        <span class="tab-icon">💰</span> VAS Revenue
+        <span class="tab-badge">Monthly</span>
+      </button>
+      <button class="nav-tab" data-tab="visit-planner" role="tab">
+        <span class="tab-icon">🗺️</span> Visit Planner
+        <span class="tab-badge">Field</span>
+      </button>
+      <button class="nav-tab placeholder" data-tab="tool-4" role="tab">
+        <span class="tab-icon">🔲</span> Tool 4
+        <span class="tab-badge">Soon</span>
+      </button>
+      <button class="nav-tab placeholder" data-tab="tool-5" role="tab">
+        <span class="tab-icon">🔲</span> Tool 5
+        <span class="tab-badge">Soon</span>
+      </button>
+    </nav>
+  </div>
+</div>
+
+<!-- ── Global upload strip ── -->
+<div class="upload-strip">
+  <div class="upload-strip-inner">
+    <span class="strip-label">Shared files</span>
+    <div class="strip-files">
+      <label class="filedrop" id="fdAccounts" title="Upload once — shared with all tools that use seller ownership">
+        <span class="dot"></span>
+        <span>
+          <span class="fd-lbl">Accounts (AM/KAM)</span>
+          <span class="fd-sub"> · seller directory</span>
+        </span>
+        <input type="file" accept=".csv,.xlsx,.xls" id="accountsInput">
+      </label>
+      <label class="filedrop" id="fdTargets" title="Upload once — targets shared with Manifest Watch">
+        <span class="dot"></span>
+        <span>
+          <span class="fd-lbl">Targets</span>
+          <span class="fd-sub"> · seller + DRR</span>
+        </span>
+        <input type="file" accept=".csv,.xlsx,.xls" id="targetsInput">
+      </label>
+    </div>
+    <div class="strip-status">
+      <span class="pill" id="sharedPill">No shared files loaded</span>
+      <span class="privacy-note-strip">🔒 Files never leave your device</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Iframe panels ── -->
+<div class="frames">
+
+  <div class="frame-wrap active" id="frame-manifest">
+    <iframe src="manifest/index.html" id="iframe-manifest" title="Manifest Watch"></iframe>
+  </div>
+
+  <div class="frame-wrap" id="frame-vas-revenue">
+    <iframe src="vas-revenue/index.html" id="iframe-vas-revenue" title="VAS Revenue" loading="lazy"></iframe>
+  </div>
+
+  <div class="frame-wrap" id="frame-visit-planner">
+    <iframe src="visit-planner/index.html" id="iframe-visit-planner" title="Visit Planner" loading="lazy"></iframe>
+  </div>
+
+  <div class="frame-wrap" id="frame-tool-4">
+    <iframe src="tool-4/index.html" id="iframe-tool-4" title="Tool 4" loading="lazy"></iframe>
+  </div>
+
+  <div class="frame-wrap" id="frame-tool-5">
+    <iframe src="tool-5/index.html" id="iframe-tool-5" title="Tool 5" loading="lazy"></iframe>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Tab switching ── */
+const tabs = document.querySelectorAll('.nav-tab');
+const frames = document.querySelectorAll('.frame-wrap');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    frames.forEach(f => f.classList.remove('active'));
+    tab.classList.add('active');
+    const id = `frame-${tab.dataset.tab}`;
+    document.getElementById(id).classList.add('active');
+  });
+});
+
+/* ── BroadcastChannel: broadcast shared files to all tool iframes ── */
+const BC = new BroadcastChannel('seller-hub-shared');
+const sharedState = { accounts: null, targets: null };
+
+function updatePill() {
+  const pill = document.getElementById('sharedPill');
+  const count = (sharedState.accounts ? 1 : 0) + (sharedState.targets ? 1 : 0);
+  if (count === 0) {
+    pill.textContent = 'No shared files loaded';
+    pill.classList.remove('ready');
+  } else {
+    const parts = [];
+    if (sharedState.accounts) parts.push('Accounts');
+    if (sharedState.targets) parts.push('Targets');
+    pill.textContent = parts.join(' + ') + ' loaded';
+    pill.classList.add('ready');
+  }
+}
+
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function handleSharedFile(file, kind) {
+  if (!file) return;
+  const el = kind === 'accounts' ? document.getElementById('fdAccounts') : document.getElementById('fdTargets');
+  const buf = await readFileAsArrayBuffer(file);
+  // Store in shared state
+  sharedState[kind] = { name: file.name, buffer: buf, kind };
+  el.classList.add('ok');
+  el.querySelector('.fd-sub').textContent = ` · ${file.name}`;
+  updatePill();
+  // Broadcast to all iframes
+  BC.postMessage({ type: 'shared-file', kind, name: file.name, buffer: buf });
+  toast(`${kind === 'accounts' ? 'Accounts' : 'Targets'} shared with all tools`);
+}
+
+document.getElementById('accountsInput').addEventListener('change', e => {
+  handleSharedFile(e.target.files[0], 'accounts');
+});
+document.getElementById('targetsInput').addEventListener('change', e => {
+  handleSharedFile(e.target.files[0], 'targets');
+});
+
+/* ── Re-broadcast shared files when an iframe finishes loading ── */
+// This handles the case where a tool iframe loads AFTER the file was already uploaded
+document.querySelectorAll('iframe').forEach(iframe => {
+  iframe.addEventListener('load', () => {
+    // Small delay to allow the iframe's BroadcastChannel listener to register
+    setTimeout(() => {
+      if (sharedState.accounts) {
+        BC.postMessage({ type: 'shared-file', kind: 'accounts', name: sharedState.accounts.name, buffer: sharedState.accounts.buffer });
+      }
+      if (sharedState.targets) {
+        BC.postMessage({ type: 'shared-file', kind: 'targets', name: sharedState.targets.name, buffer: sharedState.targets.buffer });
+      }
+    }, 600);
+  });
+});
+
+/* ── Toast ── */
+function toast(msg, duration = 2400) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), duration);
+}
+</script>
+</body>
+</html>
